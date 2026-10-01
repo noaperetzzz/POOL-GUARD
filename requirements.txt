@@ -1,0 +1,7 @@
+# Runtime dependencies. No PyTorch, no GPU, no cloud service.
+numpy>=1.24
+opencv-python>=4.8      # video I/O, drawing, and the ONNX inference backend
+scipy>=1.10             # optimal detection-to-track assignment (greedy fallback if absent)
+
+# Optional: only needed if you turn on Telegram delivery in AlarmSink.
+# requests>=2.31

@@ -1,0 +1,5 @@
+-r requirements.txt
+
+pytest>=7.4
+matplotlib>=3.7     # scripts/make_figures.py
+imageio>=2.31       # optional GIF output from scripts/demo_synthetic.py

@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# PyInstaller output
+build/
+dist/
+*.spec
+
+# Settings and the generated Hebrew file guide: both are regenerated on demand
+poolguard.ini
+docs/*.docx
+
+# 35 MB detector weights; fetch with scripts/download_model.py
+models/*.onnx
+
+# Runtime output: event snapshots and the event log
+events/*
+!events/.gitkeep
+
+# Your own zone and footage. The demo video is regenerated in one command by
+# scripts/demo_synthetic.py, so there is no reason to carry 6 MB of it in git.
+zone.json
+*.mp4
+
+# Personal files: private footage, documents and images
+my/
+pool_guard/במילים שלי.docx
