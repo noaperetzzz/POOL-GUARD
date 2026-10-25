@@ -4,7 +4,7 @@ A camera that watches a zone and raises the alarm when it should be empty.
 
 Two modes. While the pool is **open**, people swim and nothing happens. Press one
 button to **close** it, and anything that walks into the water raises an alarm in
-the house — a siren, a snapshot, a line in the log.
+the house - a siren, a snapshot, a line in the log.
 
 The hard part is not detecting people. It is *not* going off for the neighbour's
 cat, a shadow moving across the water, or the inflatable ring that has been
@@ -12,7 +12,7 @@ floating there since Tuesday. Most of this repository is about that problem.
 
 ![three frames: silent while open, a notice on a half-seen figure, an alarm on an intruder](docs/stills.jpg)
 
-*Boxes turn red once a subject is inside the zone and the pool is closed — red
+*Boxes turn red once a subject is inside the zone and the pool is closed - red
 means "being evaluated", not "alarming". The float in the third panel is inside
 the zone and is deliberately not raising anything.*
 
@@ -48,7 +48,7 @@ can tell by looking.
 
 ## Playing at real speed
 
-A 30 fps video analysed frame by frame plays at whatever the detector manages —
+A 30 fps video analysed frame by frame plays at whatever the detector manages -
 about 5 frames a second on a CPU. The result is slow motion. On a live camera it
 is worse than slow: undecoded frames pile up in the capture buffer and the delay
 grows without limit, so what you are watching drifts further into the past. For a
@@ -56,7 +56,7 @@ camera meant to catch someone entering a pool, that defeats the point.
 
 So frames are skipped. Only every 6th is decoded and analysed, the rest are
 discarded without being looked at. Five analysed frames a second consume thirty
-source frames a second — real time. The picture updates five times a second
+source frames a second - real time. The picture updates five times a second
 rather than thirty, so motion looks a little steppy, but it is *current*, and
 every frame on screen is precisely the frame its boxes were computed from.
 
@@ -66,7 +66,7 @@ a frame from one detection ago, and it would cost locks, a queue, and a class of
 bug where a worker thread reaches into a widget. One loop with frames skipped
 keeps the video and the detector in step by construction.
 
-`frame_stride` in the settings file controls it. Raise it on a slower machine —
+`frame_stride` in the settings file controls it. Raise it on a slower machine -
 the picture updates less often but stays in real time.
 
 ## Settings
@@ -84,7 +84,7 @@ sound = yes
 [detector]
 confidence = 0.35
 width = 960              ; downscale before detection
-frame_stride = 6         ; analyse every Nth frame — see above
+frame_stride = 6         ; analyse every Nth frame - see above
 
 [classes]
 person = alarm
@@ -103,7 +103,7 @@ source = c:\tmp\pool.mp4    ; reopened on the next start
 settings file, so the next start reopens that video with those corners already in
 place and the only thing left to do is press Start. Delete the four `point_`
 lines to mark a new area. This began life as a separate `zone.json` plus a "use
-saved zone" button, which meant re-picking the video every single time — a
+saved zone" button, which meant re-picking the video every single time - a
 pointless ritual for a camera that has not moved.
 
 ## How it works
@@ -115,44 +115,30 @@ frame ─▶ detector ─▶ tracker ─▶ monitor ─▶ alarm
                     as before?  be told?   log line
 ```
 
-**Detector** — YOLOX-S run through `cv2.dnn`. No PyTorch, no GPU: a 35 MB ONNX
+**Detector** - YOLOX-S run through `cv2.dnn`. No PyTorch, no GPU: a 35 MB ONNX
 file on the CPU. Using a COCO-trained detector is what makes "person or dog or
-forgotten inflatable?" answerable at all — COCO has separate `person`, `dog` and
+forgotten inflatable?" answerable at all - COCO has separate `person`, `dog` and
 `cat` classes, and no class for pool floats or garden furniture, so an inflatable
 is usually not reported. Motion-based detection can only ever say "some pixels
 changed", which is hopeless around water and moving shade.
 
-**Tracker** — a Kalman filter per subject plus IoU matching, a compact SORT
+**Tracker** - a Kalman filter per subject plus IoU matching, a compact SORT
 variant. `pool_guard/kalman.py` is written from scratch on NumPy. This buys three
 things the alarm logic depends on: stable boxes, tracks that survive a detector
 dropout, and velocity, which is never measured directly.
 
-**Monitor** — the policy. Armed/disarmed, dwell time, class rules, cooldown,
+**Monitor** - the policy. Armed/disarmed, dwell time, class rules, cooldown,
 grace period, scenery whitelist. It does no I/O and takes the current time as an
 argument, so its behaviour is fully reproducible in tests.
 
-**Alarm** — sound on a daemon thread (a blocking siren would freeze the video at
+**Alarm** - sound on a daemon thread (a blocking siren would freeze the video at
 the exact moment you most want to keep watching), an annotated snapshot, and one
 JSON line per event.
 
-Events are stamped with the position **in the recording** — `4:32` is somewhere
+Events are stamped with the position **in the recording** - `4:32` is somewhere
 you can scrub to, whereas the wall-clock time the frame happened to be analysed
 tells you nothing about where to look. A live camera has no such position, so
 there the time of day is the only meaningful stamp.
-
-## Tracking through an occlusion
-
-The subject below is invisible for nine frames, right as they cross the boundary
-— the worst possible moment to lose them. The filter coasts the track through the
-gap, so the track keeps its identity and the dwell counter keeps running. Without
-it the track would break in two, the counter would restart from zero, and the
-alarm would be late or absent.
-
-![true position, noisy detections and the Kalman estimate through an occlusion](docs/kalman_occlusion.png)
-
-While the subject is visible, filtering also cuts the mean position error from
-2.1 px to 1.5 px. That figure is regenerated from the real pipeline by
-`scripts/make_figures.py`, not drawn by hand.
 
 ## Not crying wolf
 
@@ -165,7 +151,7 @@ drowned child. So the detector threshold is deliberately low, and the noise that
 lets in is removed by *agreement over time* rather than by demanding more of any
 single frame.
 
-**Certainty is graded, not binary.** A weakly supported subject raises a NOTICE —
+**Certainty is graded, not binary.** A weakly supported subject raises a NOTICE -
 a soft chime and a saved still, "come and look". Only a well supported one raises
 an ALARM. The ambiguous middle goes to a human instead of being guessed at.
 
@@ -189,7 +175,7 @@ in frames, and when the engine began analysing every 6th frame instead of every
 frame, each one silently became six times longer. "Survives 12 frames without a
 detection" went from 0.4 seconds to 2.4 seconds, so a track that had lost its
 subject kept being predicted and drifted across the lawn as a box around nobody.
-Nothing crashed and nothing looked broken — the system simply did everything at
+Nothing crashed and nothing looked broken - the system simply did everything at
 the wrong speed. Expressed in seconds, the stride cannot change any behaviour.
 
 **An alarm requires a current sighting, not a prediction.** Coasting a track
@@ -204,7 +190,7 @@ frames to zero.
 **Matching needs a second pass on distance.** At five analysed frames a second a
 walking person moves more than their own width between frames, so their predicted
 box and their next detection do not overlap at all. Overlap-only matching
-abandoned them and started a new track every few frames — and every abandoned
+abandoned them and started a new track every few frames - and every abandoned
 track became one of those phantom boxes. An unmatched detection may now still join
 an unmatched track if their centres are close relative to the box size.
 
@@ -212,7 +198,7 @@ an unmatched track if their centres are close relative to the box size.
 mean opposite things: scattered gaps are what an unreliable detection looks like,
 while one long gap is a real subject that went behind a chair. Scoring them the
 same way meant a person who was briefly hidden came out of it looking *less*
-certainly a person — which downgraded a siren to a chime, exactly backwards for a
+certainly a person - which downgraded a siren to a chime, exactly backwards for a
 safety alarm. `Track.detection_rate` counts short gaps against a track and
 excludes long ones.
 
@@ -223,8 +209,8 @@ location, unlike its id, does not change.
 
 ## Measuring the zone, and the measurement that was removed
 
-Fill in the `[measurements]` section — the four sides and at least one diagonal,
-in centimetres — and speeds are reported in metres per second instead of pixels.
+Fill in the `[measurements]` section - the four sides and at least one diagonal,
+in centimetres - and speeds are reported in metres per second instead of pixels.
 Leave it blank and everything works identically, in pixels.
 
 The zone is a quadrilateral and does not have to be a rectangle; a real garden
@@ -240,7 +226,7 @@ looks like. Type one digit wrong and the same check jumps to 90 cm and says so.
 
 **Height is not offered, and that is a decision rather than an omission.** An
 earlier version estimated it from the ground-plane homography. Tested against a
-real garden camera — mounted high and angled down, as these always are — it
+real garden camera - mounted high and angled down, as these always are - it
 reported a 186 cm adult as anywhere from 154 to 204 cm, changing as he walked
 towards the camera, and it called a 160 cm teenager "adult" and a 60 cm dog
 "child-sized". A homography describes one flat surface, and a standing person's
@@ -271,16 +257,16 @@ Four things the packaging has to get right:
   fails on its first relative import. `poolguard_app.py` exists only to import the
   package absolutely.
 - **A windowed build has no console**, so an unhandled exception makes the program
-  vanish with no explanation — the worst failure mode for someone who just
+  vanish with no explanation - the worst failure mode for someone who just
   double-clicked it. `main.py` catches anything that escapes, writes
   `poolguard-error.log` next to the executable, and shows it. Given command-line
   arguments it attaches to the calling terminal so printing works normally.
 - **`cv2.imread` and `cv2.imwrite` cannot handle non-ASCII paths on Windows.** They
   fail *quietly*, returning None, so a perfectly valid photo looks like a corrupt
-  file — which is exactly what happened with a Hebrew filename. `imaging.py` reads
+  file - which is exactly what happened with a Hebrew filename. `imaging.py` reads
   and writes the bytes in Python and decodes in memory instead.
 
-SciPy is excluded from the build — it is only used for optimal
+SciPy is excluded from the build - it is only used for optimal
 detection-to-track assignment, `tracker.py` falls back to greedy matching, and
 leaving it out saves about 60 MB.
 
@@ -302,7 +288,7 @@ python -m pytest tests -q      # 146 tests, a couple of seconds
 
 The suite needs no camera, no footage and no model file: `pool_guard/synthetic.py`
 provides a scripted scene with ground truth and feeds the tracker the kind of
-imperfect input a real detector produces — jittery boxes, missed frames, an
+imperfect input a real detector produces - jittery boxes, missed frames, an
 occasional wrong label.
 
 `tests/test_scene.py` pins the end-to-end behaviour on a scene with five subjects
@@ -313,7 +299,7 @@ fails CI instead of being discovered by a siren at midnight.
 
 Several bugs here were caught by writing a test rather than by reading the code: a
 track that never confirmed when `min_hits=1`, a Hebrew filename that `cv2.imread`
-refused, and — in the figure script rather than the system — ground-truth pairing
+refused, and - in the figure script rather than the system - ground-truth pairing
 by centre distance, which silently plotted a float's track as the intruder and
 made the filter look three times worse than the raw detections it was cleaning up.
 
@@ -354,7 +340,7 @@ does not contain.
 
 The Kalman covariance update uses the Joseph form. It is algebraically identical
 to `(I - KH)P` but stays symmetric and positive-definite over thousands of
-updates, where the short form can drift asymmetric and quietly diverge — for a
+updates, where the short form can drift asymmetric and quietly diverge - for a
 process that runs for days, that matters.
 
 The filter takes an explicit `dt` per step. Detection does not run once per frame,
